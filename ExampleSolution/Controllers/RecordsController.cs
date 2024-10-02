@@ -13,70 +13,70 @@ namespace ExampleSolution.Controllers
             logger = _logger;
         }
 
-        // Ýptal edilebilir kayýt çekme
+        // Fetch records that can be canceled
         [HttpGet("fetch/cancelable")]
         public async Task<IActionResult> FetchRecordsCancelableAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var records = await GetRecordsAsync(cancellationToken); // CancellationToken'ý geçir
+                var records = await GetRecordsAsync(cancellationToken); // Pass the CancellationToken
                 return Ok(records);
             }
             catch (OperationCanceledException)
             {
                 logger.LogInformation("FetchRecordsCancelableAsync => stop canceltoken");
-                return StatusCode(499, "Sorgu iptal edildi."); // 499: Client Closed Request (NGINX)
+                return StatusCode(499, "Query canceled."); // 499: Client Closed Request (NGINX)
             }
         }
 
-        // Ýptal edilmeden kayýt çekme
+        // Fetch records without cancellation
         [HttpGet("fetch/normal")]
         public async Task<IActionResult> FetchRecordsNormalAsync()
         {
-            var records = await GetRecordsNormalAsync(); // Ýptal kontrolü olmadan çaðýr
+            var records = await GetRecordsNormalAsync(); // Call without cancellation check
             return Ok(records);
         }
 
-        // Ýptal edilebilir kayýt çeken metot
+        // Method to fetch records that can be canceled
         private async Task<List<int>> GetRecordsAsync(CancellationToken cancellationToken)
         {
             var records = new List<int>();
 
             for (int i = 1; i <= 200; i++)
             {
-                cancellationToken.ThrowIfCancellationRequested(); // Ýptal kontrolü
+                cancellationToken.ThrowIfCancellationRequested(); // Check for cancellation
 
-                records.Add(i); // Kayýt ekle
+                records.Add(i); // Add record
 
-                // Performansý simüle etmek için gecikme ekliyoruz
-                await Task.Delay(50, cancellationToken); // Gecikme sýrasýnda iptal kontrolü
+                // Simulate performance by adding a delay
+                await Task.Delay(50, cancellationToken); // Check for cancellation during delay
 
-                // Her 1000 kayýtta bir log mesajý verebiliriz
+                // Log a message every 10 records
                 if (i % 10 == 0)
                 {
-                    logger.LogInformation($"Cancel => {i} kayýt iþlendi."); // Log kaydý ekle
+                    logger.LogInformation($"Cancel => {i} records processed."); // Add log entry
                 }
             }
 
             return records;
         }
 
-        // Ýptal edilmeyen kayýt çeken metot
+        // Method to fetch records without cancellation
         private async Task<List<int>> GetRecordsNormalAsync()
         {
             var records = new List<int>();
 
             for (int i = 1; i <= 200; i++)
             {
-                records.Add(i); // Ýptal kontrolü olmadan kayýt ekle
+                records.Add(i); // Add record without cancellation check
 
-                // Performansý simüle etmek için gecikme ekliyoruz
-                await Task.Delay(50); // Gecikme sýrasýnda iptal kontrolü yok
+                // Simulate performance by adding a delay
+                await Task.Delay(50); // No cancellation check during delay
 
-                // Her 1000 kayýtta bir log mesajý verebiliriz
+                // Log a message every 10 records
                 if (i % 10 == 0)
                 {
-                    logger.LogInformation($"Normal => {i} kayýt iþlendi."); // Log kaydý ekle
+                    logger.LogInformation($"Normal => {i} records processed."); // Add log entry
                 }
             }
 
