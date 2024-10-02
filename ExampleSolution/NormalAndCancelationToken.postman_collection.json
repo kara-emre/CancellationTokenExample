@@ -1,0 +1,55 @@
+{
+	"info": {
+		"_postman_id": "018e7b9b-e99a-42c9-8457-76ae627544ba",
+		"name": "NormalAndCancelationToken",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8982867",
+		"_collection_link": "https://crimson-flare-5899.postman.co/workspace/Team-Workspace~52d21cfc-0f85-4c23-8744-5b20b4adf7e5/collection/8982867-018e7b9b-e99a-42c9-8457-76ae627544ba?action=share&source=collection_link&creator=8982867"
+	},
+	"item": [
+		{
+			"name": "cancel",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7009/api/Records/fetch/cancelable",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7009",
+					"path": [
+						"api",
+						"Records",
+						"fetch",
+						"cancelable"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "normal",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:7009/api/Records/fetch/normal",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "7009",
+					"path": [
+						"api",
+						"Records",
+						"fetch",
+						"normal"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
