@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExampleSolution.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/records")]
     public class RecordsController : ControllerBase
     {
         private readonly ILogger<RecordsController> logger;
@@ -13,32 +13,32 @@ namespace ExampleSolution.Controllers
             logger = _logger;
         }
 
-        // Fetch records that can be canceled
-        [HttpGet("fetch/cancelable")]
-        public async Task<IActionResult> FetchRecordsCancelableAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Retrieves a list of records with optional cancellation support.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to stop the request if needed.</param>
+        /// <returns>Returns a list of integer records, or a 499 status if the request was canceled.</returns>
+        [HttpGet]
+        public async Task<IActionResult> GetRecordsAsync(CancellationToken cancellationToken)
         {
             try
             {
-                var records = await GetRecordsAsync(cancellationToken); // Pass the CancellationToken
+                var records = await FetchRecordsAsync(cancellationToken);
                 return Ok(records);
             }
             catch (OperationCanceledException)
             {
-                logger.LogInformation("FetchRecordsCancelableAsync => stop canceltoken");
-                return StatusCode(499, "Query canceled."); // 499: Client Closed Request (NGINX)
+                logger.LogInformation("GetRecordsAsync => stop cancellation");
+                return StatusCode(499, "Request was canceled by the client."); // 499: Client Closed Request (NGINX)
             }
         }
 
-        // Fetch records without cancellation
-        [HttpGet("fetch/normal")]
-        public async Task<IActionResult> FetchRecordsNormalAsync()
-        {
-            var records = await GetRecordsNormalAsync(); // Call without cancellation check
-            return Ok(records);
-        }
-
-        // Method to fetch records that can be canceled
-        private async Task<List<int>> GetRecordsAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// Fetches records with cancellation support.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token to stop the process midway.</param>
+        /// <returns>Returns a list of integers representing records.</returns>
+        private async Task<List<int>> FetchRecordsAsync(CancellationToken cancellationToken)
         {
             var records = new List<int>();
 
@@ -54,21 +54,35 @@ namespace ExampleSolution.Controllers
                 // Log a message every 10 records
                 if (i % 10 == 0)
                 {
-                    logger.LogInformation($"Cancel => {i} records processed."); // Add log entry
+                    logger.LogInformation($"Cancelable => {i} records processed.");
                 }
             }
 
             return records;
         }
 
-        // Method to fetch records without cancellation
-        private async Task<List<int>> GetRecordsNormalAsync()
+        /// <summary>
+        /// Retrieves a list of records without cancellation support.
+        /// </summary>
+        /// <returns>Returns a list of integer records.</returns>
+        [HttpGet("normal")]
+        public async Task<IActionResult> GetRecordsNormalAsync()
+        {
+            var records = await FetchRecordsNormalAsync();
+            return Ok(records);
+        }
+
+        /// <summary>
+        /// Fetches records without cancellation support.
+        /// </summary>
+        /// <returns>Returns a list of integers representing records.</returns>
+        private async Task<List<int>> FetchRecordsNormalAsync()
         {
             var records = new List<int>();
 
             for (int i = 1; i <= 200; i++)
             {
-                records.Add(i); // Add record without cancellation check
+                records.Add(i); // Add record
 
                 // Simulate performance by adding a delay
                 await Task.Delay(50); // No cancellation check during delay
@@ -76,7 +90,7 @@ namespace ExampleSolution.Controllers
                 // Log a message every 10 records
                 if (i % 10 == 0)
                 {
-                    logger.LogInformation($"Normal => {i} records processed."); // Add log entry
+                    logger.LogInformation($"Normal => {i} records processed.");
                 }
             }
 
